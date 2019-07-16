@@ -1,0 +1,9 @@
+<launch>
+
+  <include file="$(find person_navigation)/launch/person_navigation_alone.launch" >
+    <arg name="pddl_domain_file" value="/tmp/domain_person_navigation.pddl" />
+    <arg name="topological_map"  value="$(find person_navigation)/test/test_topological_map.yaml" />
+  </include>
+
+  <test test-name="test1" pkg="person_navigation" type="person_navigation-test" />
+</launch>

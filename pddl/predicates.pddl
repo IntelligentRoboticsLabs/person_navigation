@@ -1,0 +1,5 @@
+(person_followed ?r - robot ?p - person)
+(person_at ?p - person ?wp - waypoint)
+(person_at_room ?p - person ?room - room)
+(robot_near_person ?r - robot ?p - person)
+(person_guided ?p - person ?wp - waypoint)

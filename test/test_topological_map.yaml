@@ -1,0 +1,110 @@
+room_ids: ["outdoor", "corridor", "kitchen", "livingroom", "bedroom", "bathroom"]
+door_ids: ["maindoor_to_corridor", "corridor_to_maindoor",
+           "corridor_to_livingroom", "livingroom_to_corridor"]
+
+connections: ["corridor_to_kitchen",
+              "kitchen_to_bedroom", "livingroom_to_bedroom",
+              "livingroom_to_bathroom"]
+
+waypoints_ids: ["wp_maindoor_to_corridor", "wp_corridor_from_maindoor",
+                "wp_corridor_to_maindoor", "wp_maindoor_from_corridor",
+                "wp_corridor_to_livingroom", "wp_livingroom_from_corridor",
+                "wp_livingroom_to_corridor", "wp_corridor_from_livingroom",
+                "wp_corridor", "wp_livingroom", "wp_kitchen","wp_bedroom",
+                "wp_bathroom"]
+
+corridor_to_kitchen: {
+        rooms: ["corridor", "kitchen"]
+}
+
+kitchen_to_bedroom: {
+        rooms: ["kitchen", "bedroom"]
+}
+
+livingroom_to_bedroom: {
+        rooms: ["livingroom", "bedroom"]
+}
+livingroom_to_bathroom: {
+        rooms: ["livingroom", "bathroom"]
+}
+
+maindoor_to_corridor: {
+    waypoints: ["wp_maindoor_to_corridor", "wp_corridor_from_maindoor"]
+}
+
+corridor_to_maindoor: {
+    waypoints: ["wp_corridor_to_maindoor", "wp_maindoor_from_corridor"]
+}
+
+corridor_to_livingroom: {
+    waypoints: ["wp_corridor_to_livingroom", "wp_livingroom_from_corridor"]
+}
+
+livingroom_to_corridor: {
+    waypoints: ["wp_livingroom_to_corridor", "wp_corridor_from_livingroom"]
+}
+
+wp_maindoor_to_corridor: {
+    room: "outdoor",
+    position: "8.5, 12.5, -1.5707"
+}
+
+wp_corridor_from_maindoor: {
+    room: "corridor",
+    position: "8.5, 11.5, -1.5707"
+}
+
+wp_corridor_to_maindoor: {
+    room: "corridor",
+    position: "8.5, 11.5, 1.5707"
+}
+
+wp_maindoor_from_corridor: {
+    room: "outdoor",
+    position: "8.5, 12.5, 1.5707"
+}
+
+wp_corridor_to_livingroom: {
+    room: "corridor",
+    position: "-0.5, 0.5, 0.0"
+}
+
+wp_livingroom_from_corridor: {
+    room: "livingroom",
+    position: "0.5, 0.5, 0.0"
+}
+
+wp_livingroom_to_corridor: {
+    room: "livingroom",
+    position: "0.5, 0.5, 3.14"
+}
+
+wp_corridor_from_livingroom: {
+    room: "corridor",
+    position: "-0.5, 0.5, 3.14"
+}
+
+wp_corridor: {
+    room: "corridor",
+    position: "8.0, 4.5, -1.5707"
+}
+
+wp_livingroom: {
+    room: "livingroom",
+    position: "3.0, 3.0, -1.57"
+}
+
+wp_bedroom: {
+    room: "bedroom",
+    position: "20.412, 11.509, -1.57"
+}
+
+wp_kitchen: {
+    room: "kitchen",
+    position: "7.0, 6.0, -1.57"
+}
+
+wp_bathroom: {
+    room: "bathroom",
+    position: "7.0, 6.0, -1.57"
+}
