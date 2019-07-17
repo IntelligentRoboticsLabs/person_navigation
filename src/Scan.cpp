@@ -35,54 +35,65 @@
 /* Author: Francisco Martín fmrico@gmail.com */
 
 /* Mantainer: Francisco Martín fmrico@gmail.com */
-#include <ros/ros.h>
-#include <vector>
+/*
+ * Scan.cpp
+ *
+ *  Created on: 24/12/2015
+ *      Author: paco
+ */
+
+#include "Scan.h"
+
 #include <string>
-#include <fstream>
-#include <boost/foreach.hpp>
-#include "sensor_msgs/Range.h"
-#include "actionlib/client/simple_action_client.h"
-#include "move_base_msgs/MoveBaseAction.h"
 
-#include "geometry_msgs/PoseStamped.h"
-#include "std_srvs/Empty.h"
-
-#include <bica_planning/Action.h>
-#include <topological_navigation_msgs/GetLocation.h>
-
-#ifndef KCL_cross
-#define KCL_cross
-
-class RP_guide_cross : public bica_planning::Action
+namespace person_navigation
 {
-public:
-  explicit RP_guide_cross(ros::NodeHandle& nh);
+Scan::Scan(std::string laser_topic)
+  : nh_()
+  , baseFrameId_("base_footprint")
+  , laser_topic_(laser_topic)
+  ,  // /pepper_robot/laser_corrected -> Pepper /scan
+  scan_bf_()
+{
+  scanSub_ = new message_filters::Subscriber<sensor_msgs::LaserScan>(nh_, laser_topic_, 5);
+  tfScanSub_ = new tf::MessageFilter<sensor_msgs::LaserScan>(*scanSub_, tfListener_, baseFrameId_, 5);
+  tfScanSub_->registerCallback(boost::bind(&Scan::scanCallback, this, _1));
+}
 
-protected:
-  void activateCode();
-  void deActivateCode();
-  void step();
+Scan::~Scan()
+{
+}
 
-private:
-  ros::NodeHandle nh_;
+void Scan::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan_in)
+{
+  float o_t_min, o_t_max, o_t_inc;
 
-  ros::Timer timer;
-  enum StateType
+  o_t_min = scan_in->angle_min;
+  o_t_max = scan_in->angle_max;
+  o_t_inc = scan_in->angle_increment;
+
+  int num_points = static_cast<int>(2.0 * o_t_max / o_t_inc);
+
+  tf::Stamped<tf::Point> scan_sensor[num_points];
+  scan_bf_.resize(num_points);
+
+  float rx = 0.0, ry = 0.0;
+  int c = 0;
+
+  for (int i = 0; i < num_points; i++)
   {
-    DOOR_OPENED,
-    DOOR_CLOSED,
-    UNKNOWN
-  };
-  StateType state;
-  std::string actionserver_, sonar_topic_;
-  geometry_msgs::PoseStamped goal_pose_;
-  actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> action_client_;
-  ros::ServiceClient srv_goal_, clear_cmap_srv;
-  ros::Subscriber sonar_sub;
-  move_base_msgs::MoveBaseGoal goal;
-  bool goal_sended, door_msg_sended, sonar_activate;
+    float theta = o_t_min + i * o_t_inc;
+    float r = scan_in->ranges[i];
 
-  void sonarCallback(const sensor_msgs::Range::ConstPtr& sonar_in);
-};
+    scan_sensor[i].setX(r * cos(theta));
+    scan_sensor[i].setY(r * sin(theta));
+    scan_sensor[i].setZ(0.0);
+    scan_sensor[i].setW(1.0);
+    scan_sensor[i].stamp_ = scan_in->header.stamp;
+    scan_sensor[i].frame_id_ = scan_in->header.frame_id;
 
-#endif
+    tfListener_.transformPoint(baseFrameId_, scan_sensor[i], scan_bf_[i]);
+  }
+}
+
+};  // namespace person_navigation

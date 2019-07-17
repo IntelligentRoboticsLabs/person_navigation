@@ -40,23 +40,26 @@
 #include <string>
 #include <fstream>
 #include <boost/foreach.hpp>
-#include "sensor_msgs/Range.h"
-#include "actionlib/client/simple_action_client.h"
-#include "move_base_msgs/MoveBaseAction.h"
 
 #include "geometry_msgs/PoseStamped.h"
-#include "std_srvs/Empty.h"
+#include "std_msgs/Empty.h"
 
-#include <bica_planning/Action.h>
-#include <topological_navigation_msgs/GetLocation.h>
+#include <pepper_basic_capabilities_msgs/DoTalk.h>
+#include <pepper_basic_capabilities_msgs/ShowWeb.h>
+#include <ir_planning/Action.h>
+#include "actionlib/client/simple_action_client.h"
 
-#ifndef KCL_cross
-#define KCL_cross
+#include <tf/transform_listener.h>
+#include <tf/transform_broadcaster.h>
+#include "std_msgs/Bool.h"
 
-class RP_guide_cross : public bica_planning::Action
+#ifndef KCL_follow_person
+#define KCL_follow_person
+
+class RP_follow_person : public ir_planning::Action
 {
 public:
-  explicit RP_guide_cross(ros::NodeHandle& nh);
+  explicit RP_follow_person(ros::NodeHandle& nh);
 
 protected:
   void activateCode();
@@ -64,25 +67,18 @@ protected:
   void step();
 
 private:
+  void hriCallback(const std_msgs::String::ConstPtr& str_in);
+
+  bool speech_on_;
+
   ros::NodeHandle nh_;
+  std::string target_person_;
 
-  ros::Timer timer;
-  enum StateType
-  {
-    DOOR_OPENED,
-    DOOR_CLOSED,
-    UNKNOWN
-  };
-  StateType state;
-  std::string actionserver_, sonar_topic_;
-  geometry_msgs::PoseStamped goal_pose_;
-  actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> action_client_;
-  ros::ServiceClient srv_goal_, clear_cmap_srv;
-  ros::Subscriber sonar_sub;
-  move_base_msgs::MoveBaseGoal goal;
-  bool goal_sended, door_msg_sended, sonar_activate;
+  ros::ServiceClient engage_srv_, web_srv;
+  ros::Subscriber hri_sub;
 
-  void sonarCallback(const sensor_msgs::Range::ConstPtr& sonar_in);
+  tf::TransformListener tf_listener_;
+  tf::TransformBroadcaster tf_broadcaster_;
 };
 
 #endif

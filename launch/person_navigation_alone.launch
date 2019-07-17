@@ -1,0 +1,26 @@
+<launch>
+
+  <arg name="pddl_domain_file" default="/tmp/domain.pddl" />
+  <arg name="topological_map" default="$(find person_navigation)/test/test_topological_map.yaml" />
+  <arg name="pddl_packages" default="['topological_navigation', 'person_navigation']"/>
+  <arg name="map" default="$(find pepper_navigation_bringup)/maps/dummy_map.yaml"/>
+
+
+  <!-- External requirements -->
+  <node name="pddl_builder" pkg="ir_planning" type="pddl_builder.py" respawn="false" output="screen">
+      <rosparam param="pddl_packages" subst_value="True">$(arg pddl_packages)</rosparam>
+      <param name="pddl_domain_file" value="$(arg pddl_domain_file)" />
+  </node>
+
+  <include file="$(find ir_planning)/launch/planning_system.launch" >
+    <arg name="data_path" value="/tmp/common/" />
+    <arg name="domain_path"  value="$(arg pddl_domain_file)" />
+  </include>
+
+  <include file="$(find person_navigation)/launch/person_navigation.launch" >
+      <arg name="topological_map"  value="$(arg topological_map)" />
+      <arg name="map"  value="$(arg map)" />
+  </include>
+
+
+</launch>

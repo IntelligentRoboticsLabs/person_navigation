@@ -1,0 +1,45 @@
+<launch>
+
+  <arg name="topological_map" />
+  <arg name="map"/>
+  <arg name="initial_pose_x" />
+  <arg name="initial_pose_y" />
+  <arg name="initial_pose_a" />
+
+
+  <!-- Capabilities node -->
+  <node name="person_follower_node" pkg="person_navigation" type="person_follower_node" respawn="false" output="screen">
+  </node>
+  <node name="people_detector_node" pkg="pepper_people_detection" type="people_detector_node" respawn="false" output="screen">
+  </node>
+
+  <!-- Actions node -->
+  <node name="rosplan_interface_approach_person" pkg="person_navigation" type="rp_approach_person" respawn="false" output="screen">
+		<param name="pddl_action_name" value="approach_person" />
+	</node>
+
+  <node name="rosplan_interface_follow_person" pkg="person_navigation" type="rp_follow_person" respawn="false" output="screen">
+    <param name="pddl_action_name" value="follow_person" />
+  </node>
+
+  <node name="rosplan_interface_guide_move" pkg="person_navigation" type="rp_guide_move" respawn="false" output="screen">
+    <param name="pddl_action_name" value="guide_move" />
+  </node>
+
+  <node name="rosplan_interface_guide_cross" pkg="person_navigation" type="rp_guide_cross" respawn="false" output="screen">
+    <param name="pddl_action_name" value="guide_cross" />
+  </node>
+
+  <node name="rosplan_interface_guide_navigate" pkg="person_navigation" type="rp_guide_navigate" respawn="false" output="screen">
+    <param name="pddl_action_name" value="guide_navigate" />
+  </node>
+
+  <include file="$(find topological_navigation)/launch/topological_navigation.launch" >
+      <arg name="topological_map"  value="$(arg topological_map)" />
+      <arg name="map"  value="$(arg map)" />
+      <arg name="initial_pose_x" value="$(arg initial_pose_x)"/>
+      <arg name="initial_pose_y" value="$(arg initial_pose_y)"/>
+      <arg name="initial_pose_a" value="$(arg initial_pose_a)"/>
+  </include>
+
+</launch>

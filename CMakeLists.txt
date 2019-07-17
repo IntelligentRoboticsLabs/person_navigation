@@ -49,7 +49,7 @@ roslint_cpp()
 #add_executable(rp_follow_person src/actions/RP_follow_person.cpp)
 add_executable(rp_guide_move src/actions/RP_guide_move.cpp)
 add_executable(rp_guide_cross src/actions/RP_guide_cross.cpp)
-#add_executable(rp_guide_navigate src/actions/RP_guide_navigate.cpp)
+add_executable(rp_guide_navigate src/actions/RP_guide_navigate.cpp)
 add_executable(rp_guide_person src/actions/RP_guide_person.cpp)
 
 #add_dependencies(person_follower_node ${catkin_EXPORTED_TARGETS} )
@@ -57,7 +57,7 @@ add_executable(rp_guide_person src/actions/RP_guide_person.cpp)
 #add_dependencies(rp_follow_person ${catkin_EXPORTED_TARGETS} )
 add_dependencies(rp_guide_move ${catkin_EXPORTED_TARGETS} )
 add_dependencies(rp_guide_cross ${catkin_EXPORTED_TARGETS} )
-#add_dependencies(rp_guide_navigate ${catkin_EXPORTED_TARGETS} )
+add_dependencies(rp_guide_navigate ${catkin_EXPORTED_TARGETS} )
 add_dependencies(rp_guide_person ${catkin_EXPORTED_TARGETS} )
 
 #target_link_libraries(person_follower_node ${catkin_LIBRARIES} )
@@ -65,7 +65,7 @@ add_dependencies(rp_guide_person ${catkin_EXPORTED_TARGETS} )
 #target_link_libraries(rp_follow_person ${catkin_LIBRARIES} )
 target_link_libraries(rp_guide_move ${catkin_LIBRARIES} )
 target_link_libraries(rp_guide_cross ${catkin_LIBRARIES} )
-#target_link_libraries(rp_guide_navigate ${catkin_LIBRARIES} )
+target_link_libraries(rp_guide_navigate ${catkin_LIBRARIES} )
 target_link_libraries(rp_guide_person ${catkin_LIBRARIES} )
 
 
@@ -76,7 +76,7 @@ install(TARGETS
     #rp_follow_person
     rp_guide_move
     rp_guide_cross
-    #rp_guide_navigate
+    rp_guide_navigate
     rp_guide_person
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

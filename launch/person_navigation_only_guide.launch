@@ -1,0 +1,66 @@
+<launch>
+  <arg name="topological_map" />
+  <arg name="map"/>
+  <arg name="robot"/>
+  <arg name="scan_topic"/>
+  <arg name="initial_pose_x" />
+  <arg name="initial_pose_y" />
+  <arg name="initial_pose_a" />
+  <arg name="action_duration"		default="0.0" />
+	<arg name="action_probability"	default="1.0" />
+	<arg name="knowledge_base"		default="rosplan_knowledge_base" />
+  <arg name="action_dispatch_topic"	default="/rosplan_plan_dispatcher/action_dispatch" />
+	<arg name="action_feedback_topic"	default="/rosplan_plan_dispatcher/action_feedback" />
+  <arg name="sonar_topic"/>
+
+  <!-- Actions node -->
+  <node name="rosplan_interface_guide_move" pkg="person_navigation" type="rp_guide_move" respawn="false" output="screen">
+    <param name="pddl_action_name" value="guide_move" />
+    <param name="knowledge_base"		value="$(arg knowledge_base)" />
+    <param name="action_duration"		value="$(arg action_duration)" />
+    <param name="action_probability"	value="$(arg action_probability)" />
+    <param name="action_dispatch_topic" value="$(arg action_dispatch_topic)"/>
+    <param name="action_feedback_topic" value="$(arg action_feedback_topic)" />
+    <param name="sonar_topic" value="$(arg sonar_topic)"/>
+  </node>
+
+  <node name="rosplan_interface_guide_cross" pkg="person_navigation" type="rp_guide_cross" respawn="false" output="screen">
+    <param name="pddl_action_name" value="guide_cross" />
+    <param name="knowledge_base"		value="$(arg knowledge_base)" />
+    <param name="action_duration"		value="$(arg action_duration)" />
+    <param name="action_probability"	value="$(arg action_probability)" />
+    <param name="action_dispatch_topic" value="$(arg action_dispatch_topic)"/>
+    <param name="action_feedback_topic" value="$(arg action_feedback_topic)" />
+    <param name="sonar_topic" value="$(arg sonar_topic)"/>
+  </node>
+
+  <node name="rosplan_interface_guide_navigate" pkg="person_navigation" type="rp_guide_navigate" respawn="false" output="screen">
+    <param name="pddl_action_name" value="guide_navigate" />
+    <param name="knowledge_base"		value="$(arg knowledge_base)" />
+    <param name="action_duration"		value="$(arg action_duration)" />
+    <param name="action_probability"	value="$(arg action_probability)" />
+    <param name="action_dispatch_topic" value="$(arg action_dispatch_topic)"/>
+    <param name="action_feedback_topic" value="$(arg action_feedback_topic)" />
+    <param name="sonar_topic" value="$(arg sonar_topic)"/>
+  </node>
+
+  <node name="rosplan_interface_guide_person" pkg="person_navigation" type="rp_guide_person" respawn="false" output="screen">
+    <param name="pddl_action_name" value="guide_person" />
+    <param name="knowledge_base"		value="$(arg knowledge_base)" />
+    <param name="action_duration"		value="$(arg action_duration)" />
+    <param name="action_probability"	value="$(arg action_probability)" />
+    <param name="action_dispatch_topic" value="$(arg action_dispatch_topic)"/>
+    <param name="action_feedback_topic" value="$(arg action_feedback_topic)" />
+  </node>
+
+  <include file="$(find topological_navigation)/launch/topological_navigation.launch" >
+      <arg name="scan_topic" value="$(arg scan_topic)"/>
+      <arg name="robot" value="$(arg robot)" />
+      <arg name="topological_map"  value="$(arg topological_map)" />
+      <arg name="map"  value="$(arg map)" />
+      <arg name="initial_pose_x" value="$(arg initial_pose_x)"/>
+      <arg name="initial_pose_y" value="$(arg initial_pose_y)"/>
+      <arg name="initial_pose_a" value="$(arg initial_pose_a)"/>
+  </include>
+
+</launch>

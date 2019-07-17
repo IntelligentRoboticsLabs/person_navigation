@@ -164,12 +164,6 @@ void RP_guide_move::step()
         }else
           action_client_.cancelAllGoals();
         break;
-      case STOPPED:
-        ROS_INFO("State STOPPED");
-        action_client_.cancelAllGoals();
-        // talk("De acuerdo, volveré a la recepción");
-        setFail();
-        break;
     }
   bool finished_before_timeout = action_client_.waitForResult(ros::Duration(0.5));
   if (finished_before_timeout) {

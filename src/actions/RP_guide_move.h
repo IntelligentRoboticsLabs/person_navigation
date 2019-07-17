@@ -93,7 +93,7 @@ private:
   actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> action_client_;
   bool guide_move_paused, personInRange, guide_started;
   move_base_msgs::MoveBaseGoal goal;
-  ros::ServiceClient srv_goal_, message_srv, engage_srv;
+  ros::ServiceClient srv_goal_;
   StateType state;
   ros::Subscriber sonar_sub;
   tf::TransformListener tfListener_;

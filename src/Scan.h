@@ -35,54 +35,57 @@
 /* Author: Francisco Martín fmrico@gmail.com */
 
 /* Mantainer: Francisco Martín fmrico@gmail.com */
-#include <ros/ros.h>
-#include <vector>
+/*
+ * Scan.h
+ *
+ *  Created on: 24/12/2015
+ *      Author: paco
+ */
+
+#ifndef SCAN_H_
+#define SCAN_H_
+
+#include "ros/ros.h"
+
+#include <sensor_msgs/LaserScan.h>
+#include <tf/transform_listener.h>
+#include <tf/message_filter.h>
+#include <message_filters/subscriber.h>
+#include <tf/tf.h>
+
 #include <string>
-#include <fstream>
-#include <boost/foreach.hpp>
-#include "sensor_msgs/Range.h"
-#include "actionlib/client/simple_action_client.h"
-#include "move_base_msgs/MoveBaseAction.h"
+#include <vector>
 
-#include "geometry_msgs/PoseStamped.h"
-#include "std_srvs/Empty.h"
-
-#include <bica_planning/Action.h>
-#include <topological_navigation_msgs/GetLocation.h>
-
-#ifndef KCL_cross
-#define KCL_cross
-
-class RP_guide_cross : public bica_planning::Action
+namespace person_navigation
+{
+class Scan
 {
 public:
-  explicit RP_guide_cross(ros::NodeHandle& nh);
+  explicit Scan(std::string laser_topic);
+  virtual ~Scan();
 
-protected:
-  void activateCode();
-  void deActivateCode();
-  void step();
+  void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan_in);
+
+  const std::vector<tf::Stamped<tf::Point> >& getLastScan() const
+  {
+    return scan_bf_;
+  };
 
 private:
   ros::NodeHandle nh_;
 
-  ros::Timer timer;
-  enum StateType
-  {
-    DOOR_OPENED,
-    DOOR_CLOSED,
-    UNKNOWN
-  };
-  StateType state;
-  std::string actionserver_, sonar_topic_;
-  geometry_msgs::PoseStamped goal_pose_;
-  actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> action_client_;
-  ros::ServiceClient srv_goal_, clear_cmap_srv;
-  ros::Subscriber sonar_sub;
-  move_base_msgs::MoveBaseGoal goal;
-  bool goal_sended, door_msg_sended, sonar_activate;
+  std::string baseFrameId_;
+  std::string laser_topic_;
 
-  void sonarCallback(const sensor_msgs::Range::ConstPtr& sonar_in);
+  tf::TransformListener tfListener_;
+
+  std::vector<tf::Stamped<tf::Point> > scan_bf_;
+  double robot_radious_;
+
+  tf::MessageFilter<sensor_msgs::LaserScan>* tfScanSub_;
+  message_filters::Subscriber<sensor_msgs::LaserScan>* scanSub_;
 };
 
-#endif
+};  // namespace person_navigation
+
+#endif /* SCAN_H_ */

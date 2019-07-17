@@ -48,13 +48,10 @@
 #include "geometry_msgs/PoseStamped.h"
 #include <std_msgs/Empty.h>
 #include "sensor_msgs/Range.h"
-#include <ir_planning/Action.h>
-#include <ir_planning/KMSClient.h>
+#include <bica_planning/Action.h>
+#include <bica_planning/KMSClient.h>
 #include <tf/transform_listener.h>
 #include <topological_navigation_msgs/GetLocation.h>
-#include <pepper_basic_capabilities_msgs/DoTalk.h>
-#include <pepper_basic_capabilities_msgs/ShowWeb.h>
-#include <pepper_basic_capabilities_msgs/EngageMode.h>
 
 #ifndef KCL_guide_navigate
 #define KCL_guide_navigate
@@ -66,7 +63,7 @@
 * Waypoint goals are fetched by name from the SceneDB (implemented by mongoDB).
 */
 
-class RP_guide_navigate : public ir_planning::Action
+class RP_guide_navigate : public bica_planning::Action
 {
 public:
   /* constructor */
@@ -90,25 +87,20 @@ private:
     RUNNING,
     PAUSED
   };
-  std::string actionserver_;
+  std::string actionserver_, sonar_topic_;
   geometry_msgs::PoseStamped goal_pose_;
   actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> action_client_;
-  bool guide_move_paused, headTouched, last_touched, personInRange, guide_started;
+  bool guide_move_paused, personInRange, guide_started;
   move_base_msgs::MoveBaseGoal goal;
-  ros::ServiceClient srv_goal_, clear_cmap_srv, message_srv, web_srv, engage_srv;
+  ros::ServiceClient srv_goal_, clear_cmap_srv;
   StateType state;
-  ros::Subscriber sonar_sub, head_sub, stop_action_;
+  ros::Subscriber sonar_sub;
   tf::TransformListener tfListener_;
   tf::StampedTransform odom2bf, odom2bfnow;
   ros::Time t;
   std::string text;
 
-  void headTouchCallback(const naoqi_bridge_msgs::HeadTouch::ConstPtr& touch_in);
   void sonarCallback(const sensor_msgs::Range::ConstPtr& sonar_in);
-  void talk(std::string s);
-  void attentionOn();
-  void stopActionCB(const std_msgs::Empty::ConstPtr& msg);
-
 };
 
 #endif

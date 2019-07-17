@@ -46,47 +46,15 @@
 RP_guide_navigate::RP_guide_navigate(ros::NodeHandle& nh)
   : nh_(nh), Action("guide_navigate"), action_client_("/move_base", false), goal()
 {
-  sonar_sub = nh.subscribe("/pepper_robot/sonar/back", 1, &RP_guide_navigate::sonarCallback, this);
-  head_sub = nh.subscribe("/pepper_robot/head_touch", 1, &RP_guide_navigate::headTouchCallback, this);
-  stop_action_ = nh_.subscribe("/action/guide_navigate/stop", 1, &RP_guide_navigate::stopActionCB, this);
-  message_srv = nh_.serviceClient<pepper_basic_capabilities_msgs::DoTalk>("/pepper_basic_capabilities/talk", 1);
+  nh_.param<std::string>("sonar_topic", sonar_topic_, "sonar");
+  sonar_sub = nh.subscribe(sonar_topic_, 1, &RP_guide_navigate::sonarCallback, this);
   srv_goal_ = nh.serviceClient<topological_navigation_msgs::GetLocation>("/topological_navigation/get_location");
   clear_cmap_srv = nh.serviceClient<std_srvs::Empty>("/move_base/clear_costmaps");
-  web_srv = nh_.serviceClient<pepper_basic_capabilities_msgs::ShowWeb>("/pepper_basic_capabilities/show_tablet_web");
-  engage_srv = nh_.serviceClient<pepper_basic_capabilities_msgs::EngageMode>("/pepper_basic_capabilities/engage_mode");
   guide_started = false;
   guide_move_paused = false;
   personInRange = true;
-  headTouched = false;
   state = INIT;
 }
-
-void RP_guide_navigate::talk(std::string s)
-{
-  pepper_basic_capabilities_msgs::DoTalk srv;
-  srv.request.sentence = s;
-  message_srv.call(srv);
-}
-
-void RP_guide_navigate::attentionOn()
-{
-  pepper_basic_capabilities_msgs::EngageMode engage_msg_;
-  engage_msg_.request.mode = "off";
-  engage_srv.call(engage_msg_);
-}
-
-void RP_guide_navigate::headTouchCallback(const naoqi_bridge_msgs::HeadTouch::ConstPtr& touch_in){
-  if(touch_in->state==1){
-    headTouched = true;
-    ROS_INFO("[headTouchCallback ]HEAD TOUCHED");
-  }
-}
-
-void RP_guide_navigate::stopActionCB(const std_msgs::Empty::ConstPtr& msg)
-{
-  setFail();
-}
-
 
 void RP_guide_navigate::sonarCallback(const sensor_msgs::Range::ConstPtr& sonar_in){
     ROS_DEBUG("[sonarCallback] Range -- %f",sonar_in->range);
@@ -133,7 +101,6 @@ void RP_guide_navigate::activateCode()
   //move_base_msgs::MoveBaseGoal goal;
   goal.target_pose = goal_pose_;
   goal.target_pose.header.frame_id = "/map";
-  headTouched = false;
   state = INIT;
 }
 
@@ -157,7 +124,7 @@ void RP_guide_navigate::step()
           state = STARTING;
       } else {
         ROS_INFO("[guide_move] INIT state");
-        talk("¡Sígueme!");
+        // talk("¡Sígueme!");
         goal.target_pose.header.stamp = ros::Time::now();
         action_client_.sendGoal(goal);
         state = STARTING;
@@ -168,46 +135,25 @@ void RP_guide_navigate::step()
       guide_started = true;
       if(hNow > hOrigin + 0.5)
         state = RUNNING;
-      else if(headTouched){
-        action_client_.cancelAllGoals();
-        talk("De acuerdo, te espero aquí. ¡No tardes, por favor!");
-        headTouched = false;
-        state = PAUSED;
-      }
       break;
     case RUNNING:
       ROS_INFO("State RUNNING");
       if(!personInRange){
           action_client_.cancelAllGoals();
-          talk("Parece que te he perdido, colocate detrás de mi.");
+          // talk("Parece que te he perdido, colocate detrás de mi.");
           state = WAITING;
-      }else if(headTouched){
-          action_client_.cancelAllGoals();
-          talk("De acuerdo, te espero aquí. ¡No tardes, por favor!");
-          headTouched = false;
-          state = PAUSED;
-      }
       break;
     case WAITING:
       ROS_INFO("State WAITING");
       if(personInRange){
-          talk("Seguimos con el paseo. No te alejes mucho");
+          // talk("Seguimos con el paseo. No te alejes mucho");
           state = RUNNING;
           goal.target_pose.header.stamp = ros::Time::now();
           action_client_.sendGoal(goal);
       }else
-      action_client_.cancelAllGoals();
+        action_client_.cancelAllGoals();
       break;
-    case PAUSED:
-      ROS_INFO("State PAUSED");
-      if(headTouched){
-          talk("¡Hola otra vez! Seguimos con el paseo, mantente detrás de mi");
-          headTouched = false;
-          state = RUNNING;
-          goal.target_pose.header.stamp = ros::Time::now();
-          action_client_.sendGoal(goal);
-      }
-      break;
+    }
   }
   bool finished_before_timeout = action_client_.waitForResult(ros::Duration(0.5));
   if (finished_before_timeout) {
