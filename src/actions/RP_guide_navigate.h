@@ -42,7 +42,6 @@
 #include <boost/foreach.hpp>
 
 #include "rosplan_action_interface/RPActionInterface.h"
-#include "naoqi_bridge_msgs/HeadTouch.h"
 #include "actionlib/client/simple_action_client.h"
 #include "move_base_msgs/MoveBaseAction.h"
 #include "geometry_msgs/PoseStamped.h"
