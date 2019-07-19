@@ -46,6 +46,9 @@
 
 #include "geometry_msgs/PoseStamped.h"
 #include "std_srvs/Empty.h"
+#include <tf/transform_listener.h>
+#include <tf/message_filter.h>
+#include <message_filters/subscriber.h>
 
 #include <bica_planning/Action.h>
 #include <topological_navigation_msgs/GetLocation.h>
@@ -74,13 +77,14 @@ private:
     UNKNOWN
   };
   StateType state;
-  std::string actionserver_, sonar_topic_;
+  std::string actionserver_, sonar_topic_, sonar_frame_;
   geometry_msgs::PoseStamped goal_pose_;
   actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> action_client_;
   ros::ServiceClient srv_goal_, clear_cmap_srv;
   ros::Subscriber sonar_sub;
   move_base_msgs::MoveBaseGoal goal;
   bool goal_sended, door_msg_sended, sonar_activate;
+  tf::TransformListener tf_listener_;
 
   void sonarCallback(const sensor_msgs::Range::ConstPtr& sonar_in);
 };

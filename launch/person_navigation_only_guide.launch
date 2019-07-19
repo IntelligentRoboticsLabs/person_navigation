@@ -2,16 +2,17 @@
   <arg name="topological_map" />
   <arg name="map"/>
   <arg name="robot"/>
-  <arg name="scan_topic"/>
-  <arg name="initial_pose_x" />
-  <arg name="initial_pose_y" />
-  <arg name="initial_pose_a" />
+  <arg name="sonar_topic"/>
+  <arg name="frame_id" default=""/>
+  <arg name="scan_topic" default="scan"/>
+  <arg name="initial_pose_x" default="0.0"/>
+  <arg name="initial_pose_y" default="0.0"/>
+  <arg name="initial_pose_a" default="0.0"/>
   <arg name="action_duration"		default="0.0" />
 	<arg name="action_probability"	default="1.0" />
 	<arg name="knowledge_base"		default="rosplan_knowledge_base" />
   <arg name="action_dispatch_topic"	default="/rosplan_plan_dispatcher/action_dispatch" />
 	<arg name="action_feedback_topic"	default="/rosplan_plan_dispatcher/action_feedback" />
-  <arg name="sonar_topic"/>
 
   <!-- Actions node -->
   <node name="rosplan_interface_guide_move" pkg="person_navigation" type="rp_guide_move" respawn="false" output="screen">
@@ -22,6 +23,7 @@
     <param name="action_dispatch_topic" value="$(arg action_dispatch_topic)"/>
     <param name="action_feedback_topic" value="$(arg action_feedback_topic)" />
     <param name="sonar_topic" value="$(arg sonar_topic)"/>
+    <param name="frame_id" value="$(arg frame_id)"/>
   </node>
 
   <node name="rosplan_interface_guide_cross" pkg="person_navigation" type="rp_guide_cross" respawn="false" output="screen">
@@ -32,6 +34,7 @@
     <param name="action_dispatch_topic" value="$(arg action_dispatch_topic)"/>
     <param name="action_feedback_topic" value="$(arg action_feedback_topic)" />
     <param name="sonar_topic" value="$(arg sonar_topic)"/>
+    <param name="frame_id" value="$(arg frame_id)"/>
   </node>
 
   <node name="rosplan_interface_guide_navigate" pkg="person_navigation" type="rp_guide_navigate" respawn="false" output="screen">
@@ -42,6 +45,7 @@
     <param name="action_dispatch_topic" value="$(arg action_dispatch_topic)"/>
     <param name="action_feedback_topic" value="$(arg action_feedback_topic)" />
     <param name="sonar_topic" value="$(arg sonar_topic)"/>
+    <param name="frame_id" value="$(arg frame_id)"/>
   </node>
 
   <node name="rosplan_interface_guide_person" pkg="person_navigation" type="rp_guide_person" respawn="false" output="screen">

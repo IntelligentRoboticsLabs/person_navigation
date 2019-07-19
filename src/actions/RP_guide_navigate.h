@@ -50,6 +50,8 @@
 #include <bica_planning/Action.h>
 #include <bica_planning/KMSClient.h>
 #include <tf/transform_listener.h>
+#include <tf/message_filter.h>
+#include <message_filters/subscriber.h>
 #include <topological_navigation_msgs/GetLocation.h>
 
 #ifndef KCL_guide_navigate
@@ -86,7 +88,7 @@ private:
     RUNNING,
     PAUSED
   };
-  std::string actionserver_, sonar_topic_;
+  std::string actionserver_, sonar_topic_, sonar_frame_;
   geometry_msgs::PoseStamped goal_pose_;
   actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> action_client_;
   bool guide_move_paused, personInRange, guide_started;
@@ -94,7 +96,7 @@ private:
   ros::ServiceClient srv_goal_, clear_cmap_srv;
   StateType state;
   ros::Subscriber sonar_sub;
-  tf::TransformListener tfListener_;
+  tf::TransformListener tf_listener_;
   tf::StampedTransform odom2bf, odom2bfnow;
   ros::Time t;
   std::string text;

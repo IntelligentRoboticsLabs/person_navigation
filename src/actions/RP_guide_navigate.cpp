@@ -47,7 +47,17 @@ RP_guide_navigate::RP_guide_navigate(ros::NodeHandle& nh)
   : nh_(nh), Action("guide_navigate"), action_client_("/move_base", false), goal()
 {
   nh_.param<std::string>("sonar_topic", sonar_topic_, "sonar");
-  sonar_sub = nh.subscribe(sonar_topic_, 1, &RP_guide_navigate::sonarCallback, this);
+  nh_.param<std::string>("frame_id", sonar_frame_, "");
+
+  if (sonar_frame_ != "")
+  {
+    message_filters::Subscriber<sensor_msgs::Range> sub(nh_, sonar_topic_, 10);
+    tf::MessageFilter<sensor_msgs::Range> tf_filter(sub, tf_listener_, sonar_frame_, 10);
+    tf_filter.registerCallback(&RP_guide_navigate::sonarCallback, this);
+  }
+  else
+    sonar_sub = nh.subscribe(sonar_topic_, 1, &RP_guide_navigate::sonarCallback, this);
+
   srv_goal_ = nh.serviceClient<topological_navigation_msgs::GetLocation>("/topological_navigation/get_location");
   clear_cmap_srv = nh.serviceClient<std_srvs::Empty>("/move_base/clear_costmaps");
   guide_started = false;
@@ -68,8 +78,8 @@ void RP_guide_navigate::sonarCallback(const sensor_msgs::Range::ConstPtr& sonar_
 
 void RP_guide_navigate::activateCode()
 {
-  tfListener_.waitForTransform("/odom", "/base_footprint", ros::Time(0), ros::Duration(2.0));
-  tfListener_.lookupTransform("/odom", "/base_footprint", ros::Time(0), odom2bf);
+  tf_listener_.waitForTransform("/odom", "/base_footprint", ros::Time(0), ros::Duration(2.0));
+  tf_listener_.lookupTransform("/odom", "/base_footprint", ros::Time(0), odom2bf);
 
   while(!action_client_.waitForServer(ros::Duration(5.0))){
       ROS_WARN("[guide_navigate] Waiting for the move_base action server to come up");
@@ -111,7 +121,7 @@ void RP_guide_navigate::deActivateCode()
 
 void RP_guide_navigate::step()
 {
-  tfListener_.lookupTransform("/odom", "/base_footprint", ros::Time(0), odom2bfnow);
+  tf_listener_.lookupTransform("/odom", "/base_footprint", ros::Time(0), odom2bfnow);
   float hOrigin = sqrt(pow(odom2bf.getOrigin().x(),2)+pow(odom2bf.getOrigin().y(),2));
   float hNow = sqrt(pow(odom2bfnow.getOrigin().x(),2)+pow(odom2bfnow.getOrigin().y(),2));
   std_srvs::Empty srv_;

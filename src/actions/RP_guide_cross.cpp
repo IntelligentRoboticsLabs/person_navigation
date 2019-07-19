@@ -47,9 +47,19 @@ RP_guide_cross::RP_guide_cross(ros::NodeHandle& nh)
   : nh_(nh), Action("guide_cross"), action_client_("/move_base", false)
 {
   nh_.param<std::string>("sonar_topic", sonar_topic_, "sonar");
+  nh_.param<std::string>("frame_id", sonar_frame_, "");
+
+  if (sonar_frame_ != "")
+  {
+    message_filters::Subscriber<sensor_msgs::Range> sub(nh_, sonar_topic_, 10);
+    tf::MessageFilter<sensor_msgs::Range> tf_filter(sub, tf_listener_, sonar_frame_, 10);
+    tf_filter.registerCallback(&RP_guide_cross::sonarCallback, this);
+  }
+  else
+    sonar_sub = nh.subscribe(sonar_topic_, 1, &RP_guide_cross::sonarCallback, this);
+
   srv_goal_ = nh_.serviceClient<topological_navigation_msgs::GetLocation>("/topological_navigation/get_location");
   clear_cmap_srv = nh_.serviceClient<std_srvs::Empty>("/move_base/clear_costmaps");
-  sonar_sub = nh_.subscribe(sonar_topic_, 1, &RP_guide_cross::sonarCallback, this);
 }
 
 void RP_guide_cross::activateCode()
