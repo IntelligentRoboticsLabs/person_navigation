@@ -100,7 +100,9 @@ private:
   tf::StampedTransform odom2bf, odom2bfnow;
   ros::Time t;
   std::string text;
-
+  tf::MessageFilter<sensor_msgs::Range>* tf_sonar_sub_;
+  message_filters::Subscriber<sensor_msgs::Range>* sonar_sub_;
+  
   void sonarCallback(const sensor_msgs::Range::ConstPtr& sonar_in);
 };
 

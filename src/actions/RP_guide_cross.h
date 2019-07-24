@@ -85,7 +85,9 @@ private:
   move_base_msgs::MoveBaseGoal goal;
   bool goal_sended, door_msg_sended, sonar_activate;
   tf::TransformListener tf_listener_;
-
+  tf::MessageFilter<sensor_msgs::Range>* tf_sonar_sub_;
+  message_filters::Subscriber<sensor_msgs::Range>* sonar_sub_;
+  
   void sonarCallback(const sensor_msgs::Range::ConstPtr& sonar_in);
 };
 

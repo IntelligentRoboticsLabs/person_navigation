@@ -51,12 +51,13 @@ RP_guide_navigate::RP_guide_navigate(ros::NodeHandle& nh)
 
   if (sonar_frame_ != "")
   {
-    message_filters::Subscriber<sensor_msgs::Range> sub(nh_, sonar_topic_, 10);
-    tf::MessageFilter<sensor_msgs::Range> tf_filter(sub, tf_listener_, sonar_frame_, 10);
-    tf_filter.registerCallback(&RP_guide_navigate::sonarCallback, this);
+    sonar_sub_ = new message_filters::Subscriber<sensor_msgs::Range> (nh_, sonar_topic_, 5);
+    tf_sonar_sub_ = new tf::MessageFilter<sensor_msgs::Range> (*sonar_sub_, tf_listener_, sonar_frame_, 5);
+    tf_sonar_sub_ -> registerCallback(boost::bind(&RP_guide_navigate::sonarCallback, this, _1));
   }
   else
     sonar_sub = nh.subscribe(sonar_topic_, 1, &RP_guide_navigate::sonarCallback, this);
+
 
   srv_goal_ = nh.serviceClient<topological_navigation_msgs::GetLocation>("/topological_navigation/get_location");
   clear_cmap_srv = nh.serviceClient<std_srvs::Empty>("/move_base/clear_costmaps");
