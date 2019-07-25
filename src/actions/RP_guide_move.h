@@ -49,6 +49,7 @@
 #include "sensor_msgs/Range.h"
 #include <bica_planning/Action.h>
 #include <bica_planning/KMSClient.h>
+#include <bica_graph/graph_client.h>
 #include <tf/transform_listener.h>
 #include <tf/message_filter.h>
 #include <message_filters/subscriber.h>
@@ -90,10 +91,10 @@ private:
     PAUSED,
     STOPPED
   };
-  std::string actionserver_, sonar_topic_, sonar_frame_;
+  std::string actionserver_, sonar_topic_, sonar_frame_, robot_id;
   geometry_msgs::PoseStamped goal_pose_;
   actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> action_client_;
-  bool guide_move_paused, personInRange, guide_started;
+  bool personInRange, guide_started;
   move_base_msgs::MoveBaseGoal goal;
   ros::ServiceClient srv_goal_;
   StateType state;
@@ -103,7 +104,7 @@ private:
   ros::Time t;
   tf::MessageFilter<sensor_msgs::Range>* tf_sonar_sub_;
   message_filters::Subscriber<sensor_msgs::Range>* sonar_sub_;
-
+  bica_graph::GraphClient graph_;
 
   void sonarCallback(const sensor_msgs::Range::ConstPtr& sonar_in);
 };

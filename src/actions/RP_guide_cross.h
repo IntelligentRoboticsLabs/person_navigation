@@ -51,6 +51,7 @@
 #include <message_filters/subscriber.h>
 
 #include <bica_planning/Action.h>
+#include <bica_graph/graph_client.h>
 #include <topological_navigation_msgs/GetLocation.h>
 
 #ifndef KCL_cross
@@ -77,7 +78,7 @@ private:
     UNKNOWN
   };
   StateType state;
-  std::string actionserver_, sonar_topic_, sonar_frame_;
+  std::string actionserver_, sonar_topic_, sonar_frame_, robot_id;
   geometry_msgs::PoseStamped goal_pose_;
   actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> action_client_;
   ros::ServiceClient srv_goal_, clear_cmap_srv;
@@ -87,7 +88,8 @@ private:
   tf::TransformListener tf_listener_;
   tf::MessageFilter<sensor_msgs::Range>* tf_sonar_sub_;
   message_filters::Subscriber<sensor_msgs::Range>* sonar_sub_;
-  
+  bica_graph::GraphClient graph_;
+
   void sonarCallback(const sensor_msgs::Range::ConstPtr& sonar_in);
 };
 

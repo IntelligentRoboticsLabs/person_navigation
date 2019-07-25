@@ -60,7 +60,6 @@ RP_guide_move::RP_guide_move(ros::NodeHandle& nh)
 
   srv_goal_ = nh.serviceClient<topological_navigation_msgs::GetLocation>("/topological_navigation/get_location");
   guide_started = false;
-  guide_move_paused = false;
   personInRange = true;
   state = DIRECTIONS;
 }
@@ -71,14 +70,14 @@ void RP_guide_move::sonarCallback(const sensor_msgs::Range::ConstPtr& sonar_in)
     return;
 
   ROS_WARN("[sonarCallback] Range -- %f", sonar_in->range);
-  if (sonar_in->range < 1.5 && sonar_in->range > sonar_in->min_range)
+  if (sonar_in->range < 0.8 && sonar_in->range > sonar_in->min_range)
   {
     t = ros::Time::now();
     personInRange = true;
   }
   else
   {
-    if (ros::Time::now() > t + ros::Duration(3))
+    if (ros::Time::now() > t + ros::Duration(2))
     {
       personInRange = false;
     }
@@ -95,14 +94,20 @@ void RP_guide_move::activateCode()
   }
   std::string wpID;
   bool found = false;
-  for(size_t i=0; i<last_msg_.parameters.size(); i++) {
-      if(0==last_msg_.parameters[i].key.compare("to")) {
-          wpID = last_msg_.parameters[i].value;
-          found = true;
-      }
+  for (size_t i = 0; i < last_msg_.parameters.size(); i++)
+  {
+    if (0 == last_msg_.parameters[i].key.compare("to"))
+    {
+      wpID = last_msg_.parameters[i].value;
+      found = true;
+    }
+    else if (0 == last_msg_.parameters[i].key.compare("r"))
+    {
+      robot_id = last_msg_.parameters[i].value;
+    }
   }
 
-  std::vector< boost::shared_ptr<geometry_msgs::Pose> > results;
+  std::vector<boost::shared_ptr<geometry_msgs::Pose>> results;
   topological_navigation_msgs::GetLocation srv;
   srv.request.waypoint = wpID;
   if (srv_goal_.call(srv)){
@@ -119,7 +124,7 @@ void RP_guide_move::activateCode()
 
   //move_base_msgs::MoveBaseGoal goal;
   goal.target_pose = goal_pose_;
-  goal.target_pose.header.frame_id = "/map";
+  goal.target_pose.header.frame_id = "map";
   state = INIT;
 }
 
@@ -143,7 +148,6 @@ void RP_guide_move::step()
             state = STARTING;
         } else {
           ROS_INFO("[guide_move] INIT state");
-          // talk("¡Sígueme!");
           goal.target_pose.header.stamp = ros::Time::now();
           action_client_.sendGoal(goal);
           state = STARTING;
@@ -160,7 +164,7 @@ void RP_guide_move::step()
         if(!personInRange)
         {
           action_client_.cancelAllGoals();
-          // talk("Parece que te he perdido, colocate detrás de mi.");
+          graph_.add_edge(robot_id, "say: Keep behind me, please.", robot_id);
           state = WAITING;
         }
         break;
@@ -169,7 +173,7 @@ void RP_guide_move::step()
         if(personInRange){
           goal.target_pose.header.stamp = ros::Time::now();
           action_client_.sendGoal(goal);
-          // talk("Seguimos con el paseo. No te alejes mucho");
+          graph_.add_edge(robot_id, "say: Resuming the guide", robot_id);
           state = RUNNING;
         }else
           action_client_.cancelAllGoals();

@@ -58,11 +58,9 @@ RP_guide_navigate::RP_guide_navigate(ros::NodeHandle& nh)
   else
     sonar_sub = nh.subscribe(sonar_topic_, 1, &RP_guide_navigate::sonarCallback, this);
 
-
   srv_goal_ = nh.serviceClient<topological_navigation_msgs::GetLocation>("/topological_navigation/get_location");
   clear_cmap_srv = nh.serviceClient<std_srvs::Empty>("/move_base/clear_costmaps");
   guide_started = false;
-  guide_move_paused = false;
   personInRange = true;
   state = INIT;
 }
@@ -87,11 +85,16 @@ void RP_guide_navigate::activateCode()
   }
   std::string wpID;
   bool found = false;
-  for(size_t i=0; i<last_msg_.parameters.size(); i++) {
-      if(0==last_msg_.parameters[i].key.compare("wp2")) {
-          wpID = last_msg_.parameters[i].value;
-          found = true;
-      }
+  for (size_t i = 0; i < last_msg_.parameters.size(); i++) {
+    if (0 == last_msg_.parameters[i].key.compare("wp2"))
+    {
+      wpID = last_msg_.parameters[i].value;
+      found = true;
+    }
+    else if (0 == last_msg_.parameters[i].key.compare("r"))
+    {
+      robot_id = last_msg_.parameters[i].value;
+    }
   }
 
   std::vector< boost::shared_ptr<geometry_msgs::Pose> > results;
@@ -111,7 +114,7 @@ void RP_guide_navigate::activateCode()
 
   //move_base_msgs::MoveBaseGoal goal;
   goal.target_pose = goal_pose_;
-  goal.target_pose.header.frame_id = "/map";
+  goal.target_pose.header.frame_id = "map";
   state = INIT;
 }
 
@@ -134,8 +137,7 @@ void RP_guide_navigate::step()
           action_client_.sendGoal(goal);
           state = STARTING;
       } else {
-        ROS_INFO("[guide_move] INIT state");
-        // talk("¡Sígueme!");
+        ROS_INFO("[guide_navigate] INIT state");
         goal.target_pose.header.stamp = ros::Time::now();
         action_client_.sendGoal(goal);
         state = STARTING;
@@ -151,13 +153,13 @@ void RP_guide_navigate::step()
       ROS_INFO("State RUNNING");
       if(!personInRange){
           action_client_.cancelAllGoals();
-          // talk("Parece que te he perdido, colocate detrás de mi.");
+          graph_.add_edge(robot_id, "say: Keep behind me, please.", robot_id);
           state = WAITING;
       break;
     case WAITING:
       ROS_INFO("State WAITING");
       if(personInRange){
-          // talk("Seguimos con el paseo. No te alejes mucho");
+          graph_.add_edge(robot_id, "say: Resuming the guide", robot_id);
           state = RUNNING;
           goal.target_pose.header.stamp = ros::Time::now();
           action_client_.sendGoal(goal);

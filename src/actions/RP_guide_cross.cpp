@@ -84,6 +84,10 @@ void RP_guide_cross::activateCode()
       wpID = last_msg_.parameters[i].value;
       found = true;
     }
+    else if(0 == last_msg_.parameters[i].key.compare("r"))
+    {
+      robot_id = last_msg_.parameters[i].value;
+    }
   }
   std::vector<boost::shared_ptr<geometry_msgs::Pose> > results;
   topological_navigation_msgs::GetLocation srv;
@@ -104,7 +108,7 @@ void RP_guide_cross::activateCode()
   ROS_INFO("[guide_cross]Commanding to [%s] (%f %f)", wpID.c_str(), goal_pose_.pose.position.x,
            goal_pose_.pose.position.y);
   goal.target_pose = goal_pose_;
-  goal.target_pose.header.frame_id = "/map";
+  goal.target_pose.header.frame_id = "map";
 }
 
 void RP_guide_cross::deActivateCode()
@@ -138,7 +142,7 @@ void RP_guide_cross::step()
     case DOOR_OPENED:
       if (!goal_sended)
       {
-        // talk("Cruzando la puerta, por favor sígueme");
+        graph_.add_edge(robot_id, "say: Crossing the door.", robot_id);
         goal.target_pose.header.stamp = ros::Time::now();
         std_srvs::Empty srv;
         if (!clear_cmap_srv.call(srv))
@@ -172,7 +176,7 @@ void RP_guide_cross::step()
     case DOOR_CLOSED:
       if (!door_msg_sended)
       {
-        // talk("¿Podrías abrirme la puerta, por favor?");
+        graph_.add_edge(robot_id, "say: Could you open the door, please?.", robot_id);
         door_msg_sended = true;
       }
       break;
